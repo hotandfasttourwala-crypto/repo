@@ -68,6 +68,7 @@ function CarCard({ car }: { car: FleetCar }) {
           alt={`${car.name} image ${currentIndex + 1}`} 
           fill 
           className="object-cover transition-transform duration-700 group-hover:scale-105" 
+          unoptimized
         />
         
         {images.length > 1 && (

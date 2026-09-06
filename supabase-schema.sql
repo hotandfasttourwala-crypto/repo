@@ -1,58 +1,28 @@
--- Run this SQL in your Supabase SQL Editor
+-- ==============================================================================
+-- HOT AND FAST TOUR WALA - COMPLETE DATABASE SCHEMA & REALTIME SETUP
+-- Run this entire script in your Supabase SQL Editor (https://supabase.com/dashboard)
+-- ==============================================================================
 
 -- 1. Create Inquiries Table (For tracking Call/WhatsApp button clicks)
-CREATE TABLE public.inquiries (
+CREATE TABLE IF NOT EXISTS public.inquiries (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   type text NOT NULL, -- 'CALL', 'WHATSAPP', 'FORM'
   source_url text,
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 2. Create Contact Submissions Table (For the Contact form)
-CREATE TABLE public.contact_submissions (
+-- 2. Create Contact Submissions Table (For Contact & Callback Form Leads)
+CREATE TABLE IF NOT EXISTS public.contact_submissions (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   name text NOT NULL,
   phone text NOT NULL,
   message text,
+  status text DEFAULT 'pending',
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Note: In this project, route and vehicle data is statically generated from 
--- the 'data/routes.ts' and 'data/fleet.ts' files for maximum SEO performance.
--- You can move them to Supabase in the future if you need a CMS approach.
-
--- 3. Set up Row Level Security (RLS) policies
--- Allow anonymous users to insert into inquiries (tracking clicks)
-ALTER TABLE public.inquiries ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow public inserts on inquiries" 
-  ON public.inquiries FOR INSERT 
-  TO public 
-  WITH CHECK (true);
-
--- Allow anonymous users to insert into contact_submissions (form submits)
-ALTER TABLE public.contact_submissions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow public inserts on contact_submissions" 
-  ON public.contact_submissions FOR INSERT 
-  TO public 
-  WITH CHECK (true);
-
--- Deny read access to public (Only authenticated admins in Supabase dashboard can view the data)
-CREATE POLICY "Deny public reads on inquiries" 
-  ON public.inquiries FOR SELECT 
-  TO public 
-  USING (false);
-
-CREATE POLICY "Deny public reads on contact_submissions" 
-  ON public.contact_submissions FOR SELECT 
-  TO public 
-  USING (false);
-
--- =========================================
--- OPTION B: DYNAMIC ROUTES AND FLEET TABLES
--- =========================================
-
--- 1. Create Fleet Table
-CREATE TABLE public.fleet (
+-- 3. Create Fleet Table
+CREATE TABLE IF NOT EXISTS public.fleet (
   id text PRIMARY KEY,
   name text NOT NULL,
   type text NOT NULL,
@@ -62,8 +32,8 @@ CREATE TABLE public.fleet (
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- 2. Create Routes Table
-CREATE TABLE public.routes (
+-- 4. Create Routes Table
+CREATE TABLE IF NOT EXISTS public.routes (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   slug text UNIQUE NOT NULL,
   from_city text NOT NULL,
@@ -74,28 +44,147 @@ CREATE TABLE public.routes (
   price_suv_one_way text NOT NULL,
   price_sedan_round text NOT NULL,
   price_suv_round text NOT NULL,
-  price_ac_round text, -- For specific cases like Ujjain to Omkareshwar
+  price_ac_round text,
   return_available boolean DEFAULT true,
   related_routes jsonb,
   popular boolean DEFAULT false,
   created_at timestamp with time zone DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Allow public read access to fleet and routes
+-- ==============================================================================
+-- ROW LEVEL SECURITY (RLS) POLICIES
+-- ==============================================================================
+
+-- Enable RLS on all tables
+ALTER TABLE public.inquiries ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.contact_submissions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.fleet ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow public read access on fleet" ON public.fleet FOR SELECT TO public USING (true);
-
 ALTER TABLE public.routes ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Allow public read access on routes" ON public.routes FOR SELECT TO public USING (true);
 
--- =========================================
--- SEED DATA (Run this to populate your site!)
--- =========================================
+-- Drop existing policies if any to prevent conflicts
+DROP POLICY IF EXISTS "Allow public inserts on inquiries" ON public.inquiries;
+DROP POLICY IF EXISTS "Allow public select on inquiries" ON public.inquiries;
+DROP POLICY IF EXISTS "Allow public inserts on contact_submissions" ON public.contact_submissions;
+DROP POLICY IF EXISTS "Allow public select on contact_submissions" ON public.contact_submissions;
+DROP POLICY IF EXISTS "Allow public delete on contact_submissions" ON public.contact_submissions;
+DROP POLICY IF EXISTS "Deny public reads on contact_submissions" ON public.contact_submissions;
+DROP POLICY IF EXISTS "Deny public reads on inquiries" ON public.inquiries;
+
+DROP POLICY IF EXISTS "Allow public read access on fleet" ON public.fleet;
+DROP POLICY IF EXISTS "Allow public insert access on fleet" ON public.fleet;
+DROP POLICY IF EXISTS "Allow public delete access on fleet" ON public.fleet;
+
+DROP POLICY IF EXISTS "Allow public read access on routes" ON public.routes;
+DROP POLICY IF EXISTS "Allow public insert access on routes" ON public.routes;
+DROP POLICY IF EXISTS "Allow public delete access on routes" ON public.routes;
+
+-- Policies for Inquiries
+CREATE POLICY "Allow public inserts on inquiries" 
+  ON public.inquiries FOR INSERT 
+  TO public 
+  WITH CHECK (true);
+
+CREATE POLICY "Allow public select on inquiries" 
+  ON public.inquiries FOR SELECT 
+  TO public 
+  USING (true);
+
+-- Policies for Contact Submissions (Leads)
+CREATE POLICY "Allow public inserts on contact_submissions" 
+  ON public.contact_submissions FOR INSERT 
+  TO public 
+  WITH CHECK (true);
+
+CREATE POLICY "Allow public select on contact_submissions" 
+  ON public.contact_submissions FOR SELECT 
+  TO public 
+  USING (true);
+
+CREATE POLICY "Allow public delete on contact_submissions" 
+  ON public.contact_submissions FOR DELETE 
+  TO public 
+  USING (true);
+
+-- Policies for Fleet
+CREATE POLICY "Allow public read access on fleet" 
+  ON public.fleet FOR SELECT 
+  TO public 
+  USING (true);
+
+CREATE POLICY "Allow public insert access on fleet" 
+  ON public.fleet FOR INSERT 
+  TO public 
+  WITH CHECK (true);
+
+CREATE POLICY "Allow public delete access on fleet" 
+  ON public.fleet FOR DELETE 
+  TO public 
+  USING (true);
+
+-- Policies for Routes
+CREATE POLICY "Allow public read access on routes" 
+  ON public.routes FOR SELECT 
+  TO public 
+  USING (true);
+
+CREATE POLICY "Allow public insert access on routes" 
+  ON public.routes FOR INSERT 
+  TO public 
+  WITH CHECK (true);
+
+CREATE POLICY "Allow public delete access on routes" 
+  ON public.routes FOR DELETE 
+  TO public 
+  USING (true);
+
+-- ==============================================================================
+-- REALTIME SUBSCRIPTIONS CONFIGURATION
+-- ==============================================================================
+
+-- Enable full replica identity so updates/deletes/inserts send complete row data
+ALTER TABLE public.contact_submissions REPLICA IDENTITY FULL;
+
+-- Add contact_submissions table to the realtime publication
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_publication_tables 
+    WHERE pubname = 'supabase_realtime' 
+    AND tablename = 'contact_submissions'
+  ) THEN
+    ALTER PUBLICATION supabase_realtime ADD TABLE public.contact_submissions;
+  END IF;
+END $$;
+
+-- ==============================================================================
+-- STORAGE BUCKET (For Car Images)
+-- ==============================================================================
+
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('cars', 'cars', true)
+ON CONFLICT (id) DO NOTHING;
+
+DROP POLICY IF EXISTS "Allow public read on cars bucket" ON storage.objects;
+DROP POLICY IF EXISTS "Allow public uploads to cars bucket" ON storage.objects;
+
+CREATE POLICY "Allow public read on cars bucket" 
+  ON storage.objects FOR SELECT 
+  TO public 
+  USING (bucket_id = 'cars');
+
+CREATE POLICY "Allow public uploads to cars bucket" 
+  ON storage.objects FOR INSERT 
+  TO public 
+  WITH CHECK (bucket_id = 'cars');
+
+-- ==============================================================================
+-- SEED DATA (Populate Initial Fleet & Routes)
+-- ==============================================================================
 
 INSERT INTO public.fleet (id, name, type, image, gallery, features) VALUES
 ('sedan', 'Sedan', 'Sedan', '/images/cars/sedan.jpeg', '["/images/cars/sedan/sedan.jpeg", "/images/cars/sedan/3re.jpeg", "/images/cars/sedan/WhatsApp Image 2026-09-01 at 4.21.11 PM.jpeg", "/images/cars/sedan/WhatsApp Image 2026-09-01 at 4.21.30 PM.jpeg", "/images/cars/sedan/WhatsApp Image 2026-09-01 at 4.21.31 PM (1).jpeg", "/images/cars/sedan/WhatsApp Image 2026-09-01 at 4.21.31 PM (2).jpeg", "/images/cars/sedan/WhatsApp Image 2026-09-01 at 4.21.32 PM.jpeg", "/images/cars/sedan/WhatsApp Image 2026-09-01 at 4.21.33 PM (1).jpeg", "/images/cars/sedan/WhatsApp Image 2026-09-01 at 4.21.33 PM (2).jpeg", "/images/cars/sedan/WhatsApp Image 2026-09-01 at 4.21.33 PM.jpeg", "/images/cars/sedan/WhatsApp Image 2026-09-01 at 4.21.34 PM (1).jpeg"]', '["Comfortable", "AC Available", "Clean Interior", "Experienced Driver", "Suitable for 1–4 Passengers"]'),
-('suv', 'SUV / Ertiga', 'SUV', '/images/cars/ertiga.jpeg', '["/images/cars/suv/ertiga.jpeg", "/images/cars/suv/ertiga-2.jpeg", "/images/cars/suv/987uythg.jpeg", "/images/cars/suv/WhatsApp Image 2026-09-01 at 4.21.27 PM.jpeg", "/images/cars/suv/WhatsApp Image 2026-09-01 at 4.21.29 PM.jpeg", "/images/cars/suv/WhatsApp Image 2026-09-01 at 4.21.32 PM (1).jpeg", "/images/cars/suv/WhatsApp Image 2026-09-01 at 4.21.32 PM (2).jpeg"]', '["Spacious Interior", "AC Available", "Comfortable for Families", "Experienced Driver", "Suitable for Group Travel"]');
-
+('suv', 'SUV / Ertiga', 'SUV', '/images/cars/ertiga.jpeg', '["/images/cars/suv/ertiga.jpeg", "/images/cars/suv/ertiga-2.jpeg", "/images/cars/suv/987uythg.jpeg", "/images/cars/suv/WhatsApp Image 2026-09-01 at 4.21.27 PM.jpeg", "/images/cars/suv/WhatsApp Image 2026-09-01 at 4.21.29 PM.jpeg", "/images/cars/suv/WhatsApp Image 2026-09-01 at 4.21.32 PM (1).jpeg", "/images/cars/suv/WhatsApp Image 2026-09-01 at 4.21.32 PM (2).jpeg"]', '["Spacious Interior", "AC Available", "Comfortable for Families", "Experienced Driver", "Suitable for Group Travel"]')
+ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.routes (slug, from_city, to_city, title, description, price_sedan_one_way, price_suv_one_way, price_sedan_round, price_suv_round, price_ac_round, return_available, related_routes, popular) VALUES
 ('indore-to-ujjain', 'Indore', 'Ujjain', 'Indore to Ujjain Taxi | One Way & Round Trip Cab | Hot and Fast Tour Wala', 'Book Indore to Ujjain taxi service with Hot and Fast Tour Wala. Sedan and SUV available for one-way and round trips. Call or WhatsApp for booking.', '1350', '1700', '2700', '3200', null, true, '["ujjain-to-indore", "ujjain-to-omkareshwar", "indore-to-omkareshwar"]', true),
@@ -114,35 +203,8 @@ INSERT INTO public.routes (slug, from_city, to_city, title, description, price_s
 ('burhanpur-to-indore', 'Burhanpur', 'Indore', 'Burhanpur to Indore Taxi | One Way & Round Trip Cab | Hot and Fast Tour Wala', 'Book Burhanpur to Indore taxi service with Hot and Fast Tour Wala. Sedan and SUV available for one-way and round trips. Call or WhatsApp for booking.', '3500', '4000', '4500', '6000', null, true, '["indore-to-burhanpur", "khandwa-to-indore"]', false),
 ('ratlam-to-indore', 'Ratlam', 'Indore', 'Ratlam to Indore Taxi | One Way & Round Trip Cab | Hot and Fast Tour Wala', 'Book Ratlam to Indore taxi service with Hot and Fast Tour Wala. Sedan and SUV available for one-way and round trips. Call or WhatsApp for booking.', '2800', '3500', '3800', '4500', null, true, '["indore-to-ratlam", "mandsaur-to-indore"]', false),
 ('mandsaur-to-indore', 'Mandsaur', 'Indore', 'Mandsaur to Indore Taxi | One Way & Round Trip Cab | Hot and Fast Tour Wala', 'Book Mandsaur to Indore taxi service with Hot and Fast Tour Wala. Sedan and SUV available for one-way and round trips. Call or WhatsApp for booking.', '3500', '4500', '5500', '7000', null, true, '["indore-to-mandsaur", "neemuch-to-indore"]', false),
-('neemuch-to-indore', 'Neemuch', 'Indore', 'Neemuch to Indore Taxi | One Way & Round Trip Cab | Hot and Fast Tour Wala', 'Book Neemuch to Indore taxi service with Hot and Fast Tour Wala. Sedan and SUV available for one-way and round trips. Call or WhatsApp for booking.', '4000', '5000', '6000', '7500', null, true, '["indore-to-neemuch", "mandsaur-to-indore"]', false);
+('neemuch-to-indore', 'Neemuch', 'Indore', 'Neemuch to Indore Taxi | One Way & Round Trip Cab | Hot and Fast Tour Wala', 'Book Neemuch to Indore taxi service with Hot and Fast Tour Wala. Sedan and SUV available for one-way and round trips. Call or WhatsApp for booking.', '4000', '5000', '6000', '7500', null, true, '["indore-to-neemuch", "mandsaur-to-indore"]', false)
+ON CONFLICT (slug) DO NOTHING;
 
-
--- Allow public insert/delete for Admin Panel functionality
-CREATE POLICY "Allow public insert access on fleet" ON public.fleet FOR INSERT TO public WITH CHECK (true);
-CREATE POLICY "Allow public delete access on fleet" ON public.fleet FOR DELETE TO public USING (true);
-CREATE POLICY "Allow public insert access on routes" ON public.routes FOR INSERT TO public WITH CHECK (true);
-CREATE POLICY "Allow public delete access on routes" ON public.routes FOR DELETE TO public USING (true);
-
--- =========================================
--- STORAGE BUCKETS (Run this to enable image uploads)
--- =========================================
-
--- Create a public bucket for car images
-INSERT INTO storage.buckets (id, name, public) 
-VALUES ('cars', 'cars', true)
-ON CONFLICT (id) DO NOTHING;
-
--- Allow public read access to the bucket
-CREATE POLICY "Allow public read on cars bucket" 
-  ON storage.objects FOR SELECT 
-  TO public 
-  USING (bucket_id = 'cars');
-
--- Allow anonymous users to upload images (Needed since frontend uses anon key)
-CREATE POLICY "Allow public uploads to cars bucket" 
-  ON storage.objects FOR INSERT 
-  TO public 
-  WITH CHECK (bucket_id = 'cars');
-
--- Notify PostgREST to reload the schema cache
+-- Reload schema cache for PostgREST
 NOTIFY pgrst, 'reload schema';
