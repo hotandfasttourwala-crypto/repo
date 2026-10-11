@@ -1,52 +1,39 @@
-import { CheckCircle2 } from "lucide-react";
+import { siteData } from "../data/site";
 
 export default function WhyChooseUs() {
-  const reasons = [
-    {
-      title: "Comfortable Cars",
-      description: "Clean and comfortable vehicles for your journey.",
-    },
-    {
-      title: "Experienced Drivers",
-      description: "Professional and experienced drivers.",
-    },
-    {
-      title: "Safe & Reliable",
-      description: "Travel with confidence.",
-    },
-    {
-      title: "24/7 Available",
-      description: "Service availability around the clock.",
-    },
-    {
-      title: "Local & Outstation",
-      description: "Local trips and long-distance journeys.",
-    },
+  const advantages = [
+    { title: "24/7 Service", icon: "schedule" },
+    { title: "Professional", icon: "badge" },
+    { title: "Sanitized", icon: "sanitizer" },
+    { title: "Family Safe", icon: "security" },
+    { title: "Best Price", icon: "payments" },
+    { title: "GPS Tracked", icon: "my_location" },
+    { title: "Punctual", icon: "verified" },
+    { title: "Elite Fleet", icon: "stars" },
+    { title: "Dedicated Help", icon: "headset_mic" },
+    { title: "Tourist Permit", icon: "directions_car" },
   ];
 
   return (
-    <section className="py-20 bg-[#0A0A0A] text-white">
-      <div className="container mx-auto px-4 md:px-6 lg:px-8">
-        <div className="text-center max-w-3xl mx-auto mb-16">
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-6">
-            Why Choose Hot and Fast Tour Wala?
+    <section className="py-24 bg-white" id="advantage">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="text-center mb-20">
+          <h2 className="text-4xl md:text-5xl font-extrabold text-[#0F172A]">
+            The Hot &amp; Fast Tour Advantage
           </h2>
-          <div className="w-24 h-1 bg-[#E10600] mx-auto rounded-full"></div>
+          <p className="text-slate-500 mt-4 text-lg">
+            Indore's most trusted travel network with {siteData.experienceYears} years of excellence
+          </p>
         </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
-          {reasons.map((reason, index) => (
-            <div
-              key={index}
-              className="bg-[#111] p-6 rounded-2xl border border-white/5 hover:border-white/20 transition-colors shadow-lg"
-            >
-              <div className="w-12 h-12 bg-[#E10600]/20 text-[#E10600] rounded-xl flex items-center justify-center mb-6">
-                <CheckCircle2 size={24} />
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-10">
+          {advantages.map((item, index) => (
+            <div key={index} className="text-center group">
+              <div className="w-20 h-20 mx-auto rounded-3xl bg-blue-50 text-[#2563EB] flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-[#2563EB] group-hover:text-white transition-all duration-300 shadow-sm">
+                <span className="material-symbols-outlined text-4xl">{item.icon}</span>
               </div>
-              <h3 className="text-xl font-bold mb-3">{reason.title}</h3>
-              <p className="text-gray-400 text-sm leading-relaxed">
-                {reason.description}
-              </p>
+              <h4 className="font-bold text-[#0F172A] text-base group-hover:text-[#2563EB] transition-colors">
+                {item.title}
+              </h4>
             </div>
           ))}
         </div>

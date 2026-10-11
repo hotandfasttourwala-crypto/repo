@@ -1,10 +1,15 @@
 export const siteData = {
-  name: "Hot and Fast Tour Wala",
+  name: "Hot & Fast Tour Service",
+  legalName: "Hot and Fast Tour Wala",
+  tagline: "Indore's Trusted 24/7 Taxi & Cab Service",
   description:
-    "Taxi Service From Indore to Major Destinations. One Way, Round Trip, Local and Outstation. Comfortable AC Cars, Experienced Drivers, 24/7 Service.",
+    "Hot & Fast Tour Service provides premium taxi services in Indore. Local taxi, airport transfers, corporate car rentals, and outstation cabs across India. Professional drivers, 24/7 service.",
   phones: ["8085592607", "8085266406"],
   whatsapp: "8085592607",
-  email: "Contact us for availability",
-  address: "Indore, Madhya Pradesh",
+  email: "hotandfasttour@gmail.com",
+  address: "Vijay Nagar, Indore, Madhya Pradesh 452010",
+  experienceYears: "10+",
+  rating: "4.8",
+  reviewCount: "500+",
   year: 2026,
 };

@@ -1,69 +1,50 @@
 import Hero from "../components/Hero";
-import RouteFinder from "../components/RouteFinder";
-import PopularRoutes from "../components/PopularRoutes";
-import WhyChooseUs from "../components/WhyChooseUs";
+import About from "../components/About";
+import Services from "../components/Services";
 import Fleet from "../components/Fleet";
-import RouteVisualization from "../components/RouteVisualization";
+import RentalBanner from "../components/RentalBanner";
+import PopularRoutes from "../components/PopularRoutes";
+import PricingTable from "../components/PricingTable";
+import GoogleReviews from "../components/GoogleReviews";
+import WhyChooseUs from "../components/WhyChooseUs";
+import BookingAndContact from "../components/BookingAndContact";
 import FAQ from "../components/FAQ";
-import ContactCTA from "../components/ContactCTA";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
 
-import { getFleetData } from "../data/fleet";
-import { getAllRoutesData } from "../data/routes";
-
-export default async function Home() {
-  const cars = await getFleetData();
-  const routes = await getAllRoutesData();
-
+export default function Home() {
   return (
     <>
+      {/* 1. Hero Section */}
       <Hero />
-      <RouteFinder routes={routes} />
-      <PopularRoutes />
-      <WhyChooseUs />
-      <Fleet cars={cars} />
-      <RouteVisualization />
-      
-      {/* Round Trip Section */}
-      <section className="py-20 bg-gray-50 border-y border-gray-200">
-        <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-5xl">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-extrabold text-black mb-4">
-              One Way or <span className="text-[#E10600]">Round Trip</span> — Your Choice
-            </h2>
-            <p className="text-gray-600 text-lg">
-              We also provide reliable return journeys to Indore.
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {[
-              "Ujjain", "Omkareshwar", "Bhopal", "Khandwa", 
-              "Burhanpur", "Ratlam", "Mandsaur", "Neemuch"
-            ].map(city => (
-              <Link 
-                key={city} 
-                href={`/route/${city.toLowerCase()}-to-indore`}
-                className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:border-[#E10600] hover:shadow-md transition-all flex items-center justify-between group"
-              >
-                <span className="font-bold text-gray-800">{city} &rarr; Indore</span>
-                <ArrowRight size={16} className="text-gray-400 group-hover:text-[#E10600]" />
-              </Link>
-            ))}
-            <Link 
-                href={`/route/ujjain-to-omkareshwar`}
-                className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 hover:border-[#F5C400] hover:shadow-md transition-all flex items-center justify-between group"
-              >
-                <span className="font-bold text-gray-800">Ujjain &rarr; Omkareshwar</span>
-                <ArrowRight size={16} className="text-gray-400 group-hover:text-[#F5C400]" />
-            </Link>
-          </div>
-        </div>
-      </section>
 
+      {/* 2. About Section */}
+      <About />
+
+      {/* 3. Elite Travel Services (6 cards) */}
+      <Services />
+
+      {/* 4. Luxury Fleet */}
+      <Fleet />
+
+      {/* 5. Special Rental Package Banner */}
+      <RentalBanner />
+
+      {/* 6. Popular Outstation Routes */}
+      <PopularRoutes />
+
+      {/* 7. Local Pricing Overview Table */}
+      <PricingTable />
+
+      {/* 8. Google Reviews */}
+      <GoogleReviews />
+
+      {/* 9. The Advantage (10 features grid) */}
+      <WhyChooseUs />
+
+      {/* 10. WhatsApp Instant Booking Form & Google Map */}
+      <BookingAndContact />
+
+      {/* 11. FAQ */}
       <FAQ />
-      <ContactCTA />
     </>
   );
 }
