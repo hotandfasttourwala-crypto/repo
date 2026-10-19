@@ -19,7 +19,7 @@ export default function WhyChooseUs() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-20">
           <h2 className="text-4xl md:text-5xl font-extrabold text-[#0F172A]">
-            The Hot &amp; Fast Tour Advantage
+            The Hot &amp; Fast Tour Wala Advantage
           </h2>
           <p className="text-slate-500 mt-4 text-lg">
             Indore's most trusted travel network with {siteData.experienceYears} years of excellence

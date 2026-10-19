@@ -18,8 +18,8 @@ export default function Navbar() {
     <nav className="fixed top-0 w-full z-[100] bg-white/90 backdrop-blur-md border-b border-slate-100">
       <div className="max-w-7xl mx-auto px-5 sm:px-6 h-16 flex justify-between items-center">
         <Link href="/" className="flex items-center gap-2" onClick={closeMobileMenu}>
-          <span className="font-extrabold text-2xl tracking-tighter text-[#0F172A]">
-            Hot <span className="text-[#2563EB]">&amp;</span> Fast Tour
+          <span className="font-extrabold text-xl sm:text-2xl tracking-tighter text-[#0F172A]">
+            Hot <span className="text-[#2563EB]">&amp;</span> Fast Tour Wala
           </span>
         </Link>
         <div className="hidden md:flex items-center gap-8">

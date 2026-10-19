@@ -9,7 +9,7 @@ export default function Footer() {
           <div className="col-span-1 md:col-span-1">
             <Link className="inline-block mb-8" href="/">
               <span className="font-extrabold text-2xl tracking-tighter">
-                Hot <span className="text-[#2563EB]">&amp;</span> Fast Tour
+                Hot <span className="text-[#2563EB]">&amp;</span> Fast Tour Wala
               </span>
             </Link>
             <p className="text-slate-400 leading-relaxed mb-8">

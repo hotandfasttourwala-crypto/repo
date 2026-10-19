@@ -229,7 +229,7 @@ export default function AdminDashboard() {
             {filteredLeads.map((lead, idx) => {
               const cleanPhone = (lead.phone || "").replace(/[^0-9]/g, "");
               const formattedPhone = cleanPhone.startsWith("91") ? cleanPhone.slice(2) : cleanPhone;
-              const waLink = `https://wa.me/91${formattedPhone}?text=${encodeURIComponent(`Hello ${lead.name || ''}, we received your callback request from Hot and Fast Tour Service.`)}`;
+              const waLink = `https://wa.me/91${formattedPhone}?text=${encodeURIComponent(`Hello ${lead.name || ''}, we received your callback request from Hot and Fast Tour Wala.`)}`;
               const callLink = `tel:${lead.phone}`;
 
               return (
